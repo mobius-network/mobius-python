@@ -35,18 +35,13 @@ class Requestor:
 
         response = request(url, headers=headers, **data)
 
-        if response.status_code >= 400:
-            message = 'Something wrong'
-
-            try:
-                error = response.json()
-                message = error.get('error').get('message')
-            except Exception:
-                pass
-
-            raise ApiError(message)
-
-        return response.json()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            err_json = response.json()
+            raise ApiError(err_json.get('error').get('message'))
+        else:
+            return response.json()
 
     def get(self, resource, action, **payload):
         return self.request('GET', resource, action, **payload)
