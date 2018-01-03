@@ -9,8 +9,8 @@ class Requestor:
 
     def __init__(self, api_key=None, host=None, version=None, auth=None):
         self.api_key = api_key
-        self.host = host or 'https://mobius.network/api'
-        self.version = version or 'v1'
+        self.host = host if host is not None else 'https://mobius.network/api'
+        self.version = version if version is not None else 'v1'
         self.auth = auth
 
     def headers(self):
