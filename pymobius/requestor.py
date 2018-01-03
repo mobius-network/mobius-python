@@ -2,7 +2,7 @@ import requests
 
 
 class ApiError(Exception):
-    pass
+    """Base exception class for exceptions while communicating with the API."""
 
 
 class Requestor:
