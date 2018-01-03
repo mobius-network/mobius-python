@@ -2,15 +2,15 @@ import requests
 
 
 class ApiError(Exception):
-    pass
+    """Base exception class for exceptions while communicating with the API."""
 
 
 class Requestor:
 
     def __init__(self, api_key=None, host=None, version=None, auth=None):
         self.api_key = api_key
-        self.host = host or 'https://mobius.network/api'
-        self.version = version or 'v1'
+        self.host = host if host is not None else 'https://mobius.network/api'
+        self.version = version if version is not None else 'v1'
         self.auth = auth
 
     def headers(self):
@@ -35,18 +35,13 @@ class Requestor:
 
         response = request(url, headers=headers, **data)
 
-        if response.status_code >= 400:
-            message = 'Something wrong'
-
-            try:
-                error = response.json()
-                message = error.get('error').get('message')
-            except Exception:
-                pass
-
-            raise ApiError(message)
-
-        return response.json()
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError:
+            err_json = response.json()
+            raise ApiError(err_json.get('error').get('message'))
+        else:
+            return response.json()
 
     def get(self, resource, action, **payload):
         return self.request('GET', resource, action, **payload)
